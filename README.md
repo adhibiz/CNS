@@ -1,9 +1,9 @@
-## EX. NO: 1(A) : IMPLEMENTATION OF CAESAR CIPHER
+## EX. NO: 1 : IMPLEMENTATION OF CAESAR CIPHER
  
 
 ## AIM:
 
-To implement the simple substitution technique named Caesar cipher using Python.
+To implement the simple substitution technique named Caesar cipher using C language.
 
 ## DESCRIPTION:
 
@@ -27,37 +27,112 @@ becomes C. To change a message back, each letter is replaced by the one three be
 ### STEP-5: Display the cipher text obtained above.
 
 
-PROGRAM :-
+## PROGRAM :-
 ~~~
-#A python program to illustrate Caesar Cipher Technique
-def encrypt(text,s):
-    result = ""
+def format_key(key):
+    key = key.upper().replace('J', 'I')  
+    key = ''.join(sorted(set(key), key=key.index))  
+    return key
 
-    # traverse text
-    for i in range(len(text)):
-        char = text[i]
+def create_matrix(key):
+    alphabet = 'ABCDEFGHIKLMNOPQRSTUVWXYZ'
+    matrix = []
+    for char in key:
+        if char not in matrix:
+            matrix.append(char)
+    for char in alphabet:
+        if char not in matrix:
+            matrix.append(char)
+    return [matrix[i:i+5] for i in range(0, len(matrix), 5)] 
 
-        # Encrypt uppercase characters
-        if (char.isupper()):
-            result += chr((ord(char) + s-65) % 26 + 65)
-
-        # Encrypt lowercase characters
+def prepare_plaintext(plain_text):
+    plain_text = plain_text.upper().replace('J', 'I')
+    prepared_text = []
+    i = 0
+    while i < len(plain_text):
+        if i + 1 < len(plain_text) and plain_text[i] == plain_text[i + 1]:
+            prepared_text.append(plain_text[i] + 'X')
+            i += 1
         else:
-            result += chr((ord(char) + s - 97) % 26 + 97)
+            prepared_text.append(plain_text[i:i + 2])  
+            i += 2
+    if len(prepared_text[-1]) == 1:  
+        prepared_text[-1] = prepared_text[-1] + 'X'
+    return prepared_text
 
-    return result
 
-#check the above function
-text = "ATTACKATO
-s = 4
-print ("Text  : " + text)
-print ("Shift : " + str(s))
-print ("Cipher: " + encrypt(text,s))
+def find_position(matrix, char):
+    for i in range(5):
+        for j in range(5):
+            if matrix[i][j] == char:
+                return i, j
+
+def encrypt(plain_text, key):
+    key = format_key(key)
+    matrix = create_matrix(key)
+    bigrams = prepare_plaintext(plain_text)
+    
+    cipher_text = ''
+    for bigram in bigrams:
+        row1, col1 = find_position(matrix, bigram[0])
+        row2, col2 = find_position(matrix, bigram[1])
+        
+       
+        if row1 == row2:
+            cipher_text += matrix[row1][(col1 + 1) % 5]
+            cipher_text += matrix[row2][(col2 + 1) % 5]
+      
+        elif col1 == col2:
+            cipher_text += matrix[(row1 + 1) % 5][col1]
+            cipher_text += matrix[(row2 + 1) % 5][col2]
+      
+        else:
+            cipher_text += matrix[row1][col2]
+            cipher_text += matrix[row2][col1]
+    
+    return cipher_text
+
+def decrypt(cipher_text, key):
+    key = format_key(key)
+    matrix = create_matrix(key)
+    bigrams = [cipher_text[i:i + 2] for i in range(0, len(cipher_text), 2)]
+    
+    plain_text = ''
+    for bigram in bigrams:
+        row1, col1 = find_position(matrix, bigram[0])
+        row2, col2 = find_position(matrix, bigram[1])
+        
+        
+        if row1 == row2:
+            plain_text += matrix[row1][(col1 - 1) % 5]
+            plain_text += matrix[row2][(col2 - 1) % 5]
+       
+        elif col1 == col2:
+            plain_text += matrix[(row1 - 1) % 5][col1]
+            plain_text += matrix[(row2 - 1) % 5][col2]
+       
+        else:
+            plain_text += matrix[row1][col2]
+            plain_text += matrix[row2][col1]
+    
+    return plain_text
+
+
+if __name__ == "__main__":
+    key = input("Enter the key for Playfair Cipher: ")
+    plain_text = input("Enter the plaintext to encrypt: ")
+    
+    encrypted_text = encrypt(plain_text, key)
+    print("Encrypted Text: ", encrypted_text)
+    
+    decrypted_text = decrypt(encrypted_text, key)
+    print("Decrypted Text: ", decrypted_text)
+
 ~~~
-
-
 
 OUTPUT :-
 
-![image](https://github.com/user-attachments/assets/e40ef6db-e2bb-437e-aa4b-fbcc9aa9406e)
+![image](https://github.com/user-attachments/assets/a81f668f-3328-449e-984a-02f8ced416db)
 
+## RESULT
+THE PROGRAM IS EXECUTED SUCCESSFULLY.
